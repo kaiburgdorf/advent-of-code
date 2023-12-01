@@ -18,6 +18,7 @@
                 rows.forEach(element => {
                     var numbersArr = [];
                     var charArr = element.split('');
+                    
                     charArr.forEach((char, i) => {
                         if(/[0-9]/.test(char)) numbersArr.push(char);
                         if(charArr.length >= i+2) {
@@ -35,19 +36,12 @@
                           if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3] + charArr[i+4]) === 'seven') numbersArr.push(7);
                           if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3] + charArr[i+4]) === 'eight') numbersArr.push(8);
                         }
-
                     });
-                    console.log("numbersArr");
-                    console.log(numbersArr);
                     
-
-
-
-                    //var onlyNumbers = element.replace(/[a-z]/g, "").split("");
                     var firstdigit = numbersArr[0];
                     var seconddigit = numbersArr[numbersArr.length-1];
                     var number = parseInt(firstdigit + "" + seconddigit);
-                    console.log(number);
+                    
                     sum += number;
                 });
 
