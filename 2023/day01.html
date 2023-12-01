@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <textarea id="puzzleInput" rows="10" cols="100"></textarea>
+            <button onclick="solveClick()">solve</button>
+        </div>
+        <div>
+            <p id="solutionOutput"></p>
+        </div>
+
+        <script>
+            function solveClick() {
+                var text = document.getElementById('puzzleInput').value;
+                var rows = text.split("\n");
+                var sum = 0;
+
+                rows.forEach(element => {
+                    var numbersArr = [];
+                    var charArr = element.split('');
+                    charArr.forEach((char, i) => {
+                        if(/[0-9]/.test(char)) numbersArr.push(char);
+                        if(charArr.length >= i+2) {
+                          if((charArr[i] + charArr[i+1] + charArr[i+2]) === 'one') numbersArr.push(1);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2]) === 'two') numbersArr.push(2);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2]) === 'six') numbersArr.push(6);
+                        }
+                        if(charArr.length >= i+3) {
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3]) === 'four') numbersArr.push(4);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3]) === 'five') numbersArr.push(5);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3]) === 'nine') numbersArr.push(9);
+                        }
+                        if(charArr.length >= i+4) {
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3] + charArr[i+4]) === 'three') numbersArr.push(3);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3] + charArr[i+4]) === 'seven') numbersArr.push(7);
+                          if((charArr[i] + charArr[i+1] + charArr[i+2] + charArr[i+3] + charArr[i+4]) === 'eight') numbersArr.push(8);
+                        }
+
+                    });
+                    console.log("numbersArr");
+                    console.log(numbersArr);
+                    
+
+
+
+                    //var onlyNumbers = element.replace(/[a-z]/g, "").split("");
+                    var firstdigit = numbersArr[0];
+                    var seconddigit = numbersArr[numbersArr.length-1];
+                    var number = parseInt(firstdigit + "" + seconddigit);
+                    console.log(number);
+                    sum += number;
+                });
+
+                var outputElement = document.getElementById('solutionOutput');
+                outputElement.innerHTML = sum;
+            }
+        </script>
+    </body>
+</html>
