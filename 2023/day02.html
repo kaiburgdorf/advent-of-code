@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <textarea id="puzzleInput" rows="10" cols="100"></textarea>
+            <button onclick="solveClick()">solve</button>
+        </div>
+        <div>
+            <p id="solutionOutput"></p>
+        </div>
+
+        <script>
+            //12 red cubes, 13 green cubes, and 14
+            function solveClick() {
+                var text = document.getElementById('puzzleInput').value;
+                var rows = text.split("\n");
+                var sum = 0;
+                var sumPowerFewest = 0;
+
+                var cubesInTheBag = {
+                    red: 12,
+                    green: 13,
+                    blue: 14
+                }
+
+                rows.forEach(element => {
+
+                    var [gameid, sets] = element.split(":");
+                    gameid = gameid.split(" ")[1];
+                    gameid = parseInt(gameid);
+
+                    var redCubes = 0;
+                    var greenCubes = 0;
+                    var blueCubes = 0;
+
+                    var fewestCubesNeeded = {
+                        red: 0,
+                        green: 0,
+                        blue: 0
+                    }
+
+                    sets = sets.split(";");
+                    var isSetPossible = true;
+                    sets.forEach((set) => {
+
+                        set = set.trim();
+                        
+                        var cubes = set.split(",");
+                        cubes.forEach((cubeStr) => {
+                            cubeStr = cubeStr.trim();
+                            var [value, color] = cubeStr.split(" ");
+                            value = parseInt(value);
+                            switch(color) {
+                                case "red": 
+                                    redCubes += value;
+                                    if(fewestCubesNeeded.red < value) fewestCubesNeeded.red = value;
+                                    break;
+                                case "green":
+                                    greenCubes += value;
+                                    if(fewestCubesNeeded.green < value) fewestCubesNeeded.green = value;
+                                    break;
+                                case "blue":
+                                    blueCubes += value;
+                                    if(fewestCubesNeeded.blue < value) fewestCubesNeeded.blue = value;
+                                    break;
+                            }
+                        });
+                    
+                        if(redCubes > cubesInTheBag.red || greenCubes > cubesInTheBag.green || blueCubes > cubesInTheBag.blue){
+                            isSetPossible = false;
+                        }
+                        redCubes = 0;
+                        greenCubes = 0;
+                        blueCubes = 0;
+
+                    });
+
+
+                    var powerFewestCubes = fewestCubesNeeded.red * fewestCubesNeeded.green * fewestCubesNeeded.blue;
+                    sumPowerFewest += powerFewestCubes;
+                    if (isSetPossible) {
+                        sum += gameid;
+                    }
+                });
+
+                var outputElement = document.getElementById('solutionOutput');
+                outputElement.innerHTML = "sum valid gameids: " + sum + "<br />sum of powered fewest object: " + sumPowerFewest;
+            }
+        </script>
+    </body>
+</html>
