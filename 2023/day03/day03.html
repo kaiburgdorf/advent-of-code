@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <textarea id="puzzleInput" rows="10" cols="150"></textarea>
+            <button onclick="solveClick()">solve</button>
+        </div>
+        <div>
+            <p id="solutionOutput"></p>
+        </div>
+
+        <script>
+            var matrix = [];
+            function solveClick() {
+                var text = document.getElementById('puzzleInput').value.trim();
+                var rows = text.split("\n");
+                var sum = 0;
+                var gearSum = 0;
+
+                rows.forEach(row => {
+                    var matrixRow = [];
+                    row = row.split("");
+                    row.forEach((col) => {
+                        matrixRow.push(col);
+                    });
+                    matrix.push(matrixRow);
+                });
+
+                console.log(matrix);
+
+                matrix.forEach((row, rowindex) => {
+                    var skip = 0;
+                    row.forEach((col, colindex) => {
+
+                        if(col === "*") {
+                            var adjacents = getAdjacents(rowindex, colindex);
+                            console.log("for * in row: " + rowindex + ", col: " + colindex);
+                            console.log(adjacents);
+                            if(adjacents.length == 2) {
+                                gearSum += adjacents[0]*adjacents[1];
+                            }
+                        }
+
+                        if(skip > 0) {
+                            skip--;
+                        }
+                        else {
+                            if(/[0-9]/g.test(col)) {
+                                var number = col;
+                                var offset = 1;
+                                while(/[0-9]/g.test(matrix[rowindex][colindex+offset])) {
+                                    number += matrix[rowindex][colindex+offset];
+                                    offset++;
+                                    skip++;
+                                }
+                                //console.log(number);
+                                if(isPartNumber(rowindex, colindex, offset)) {
+                                    sum += parseInt(number);
+                                }
+                            }
+                        }
+
+                   });
+                });
+
+                var outputElement = document.getElementById('solutionOutput');
+                outputElement.innerHTML = sum + "<br />" + gearSum;
+            }
+
+            function isPartNumber(row, colFirst, numberOfDigits) {
+                //check left
+                if(colFirst > 0 ) {
+                    if(matrix[row][colFirst-1] !== 'undefined' && matrix[row][colFirst-1] !== "." && !(/[0-9]/g.test(matrix[row][colFirst-1]))) {
+                        return true;
+                    }
+                }
+                //check right
+                if(matrix[row][colFirst+numberOfDigits] !== 'undefined' && matrix[row][colFirst+numberOfDigits] !== "." && !(/[0-9]/g.test(matrix[row][colFirst+numberOfDigits]))) {
+                    if(matrix[row].length > colFirst+numberOfDigits) {
+                        return true;
+                    }
+                }
+                //check above
+                if(row > 0) {
+                    var i = 0;
+                    while(i < numberOfDigits) {
+                        if(matrix[row-1][colFirst+i] !== 'undefined' && matrix[row-1][colFirst+i] !== '.' && !(/[0-9]/g.test(matrix[row-1][colFirst+i])) ) {
+                            return true;
+                        }
+                        i++;
+                    }
+                    //check diagonal corners
+                    //top left
+                    if(colFirst > 0 && matrix[row-1][colFirst-1] !== 'undefined' && matrix[row-1][colFirst-1] !== '.' && !(/[0-9]/g.test(matrix[row-1][colFirst-1])) ) {
+                        return true;
+                    }
+                    //top right
+                    if(matrix[row-1][colFirst+numberOfDigits] !== 'undefined' && matrix[row-1][colFirst+numberOfDigits] !== '.' && !(/[0-9]/g.test(matrix[row-1][colFirst+numberOfDigits])) ) {
+                        if(matrix[row-1].length > colFirst+numberOfDigits) {
+                            return true;
+                        }
+                    }
+                }
+
+                //check below
+                if(row < matrix.length-1) {
+                    var i = 0;
+                    while(i < numberOfDigits) {
+                        if(matrix[row+1][colFirst+i] !== 'undefined' && matrix[row+1][colFirst+i] !== '.' && !(/[0-9]/g.test(matrix[row+1][colFirst+i])) ) {
+                            return true;
+                        }
+                        i++;
+                    }
+                    //check diagonal corners
+                    //bottom left
+                    if(colFirst > 0 && [row+1][colFirst-1] !== 'undefined' && matrix[row+1][colFirst-1] !== '.' && !(/[0-9]/g.test(matrix[row+1][colFirst-1])) ) {
+                        return true;
+
+                    }
+                    //bottom right
+                    if(matrix[row+1][colFirst+numberOfDigits] !== 'undefined' && matrix[row+1][colFirst+numberOfDigits] !== '.' && !(/[0-9]/g.test(matrix[row+1][colFirst+numberOfDigits])) ) {
+                        if(matrix[row+1].length > colFirst+numberOfDigits) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+      
+            function getAdjacents(row, col) {
+                var adjacents = [];
+
+                //row above can consist of one two numbers. if same col in row above is a digit just one is possible
+
+
+                //above
+                if(row > 0 && col > 0 && /[0-9]/g.test(matrix[row-1][col])) {
+                    //while... to get whole number
+                    console.log("top-center");
+                    var number = "";
+                    var offset = 0;
+                    while(col-offset >= 0 && /[0-9]/g.test(matrix[row-1][col-offset])) {
+                        number = matrix[row-1][col-offset] + number;
+                        offset++;
+                    }
+                    
+                    offset = 1;
+                    while(col+offset < matrix[row].length && /[0-9]/g.test(matrix[row-1][col+offset])) {
+                        number = number + matrix[row-1][col+offset];
+                        offset++;
+                    }
+
+                    adjacents.push(parseInt(number));
+                }
+                else {
+                    if(row > 0 && col > 0 && /[0-9]/g.test(matrix[row-1][col-1])) {
+                        //determine mulitdigit number
+                        console.log("adjacent top-left");
+                        var number = "";
+                        var offset = 1;
+                        while(col-offset >= 0 && /[0-9]/g.test(matrix[row-1][col-offset])) {
+                            number = matrix[row-1][col-offset] + number;
+                            offset++;
+                        }
+                        adjacents.push(parseInt(number));
+                    }
+                    
+                    if(row > 0 && col+1 < matrix[row].length && /[0-9]/g.test(matrix[row-1][col+1])) {
+                        //determine mulitdigit number
+                        console.log("adjacent top-right");
+                        var number = "";
+                        var offset = 1;
+                        while(col+offset < matrix[row].length && /[0-9]/g.test(matrix[row-1][col+offset])) {
+                            number = number + matrix[row-1][col+offset];
+                            offset++;
+                        }
+                        adjacents.push(parseInt(number));
+                    }
+                }
+
+
+                //same row
+                //left
+                if(col > 0 && /[0-9]/g.test(matrix[row][col-1])) {
+                    console.log("left");
+                    var number = "";
+                    var offset = 1;
+                    while(col-offset >= 0 && /[0-9]/g.test(matrix[row][col-offset])) {
+                        number = matrix[row][col-offset] + number;
+                        offset++;
+                    }
+                    adjacents.push(parseInt(number));
+                }
+
+                //right
+                if(col+1 < matrix[row].length && /[0-9]/g.test(matrix[row][col+1])) {
+                    console.log("right");
+                    var number = "";
+                    var offset = 1;
+                    while(col+offset < matrix[row].length && /[0-9]/g.test(matrix[row][col+offset])) {
+                        number = number + matrix[row][col+offset];
+                        offset++;
+                    }
+                    adjacents.push(parseInt(number));
+                }
+
+                //below
+                if(row+1 < matrix.length && /[0-9]/g.test(matrix[row+1][col])) {
+                    //while... to get whole number
+                    console.log("bottom-center");
+                    var number = "";
+                    var offset = 0;
+                    while(col-offset >= 0 && /[0-9]/g.test(matrix[row+1][col-offset])) {
+                        number = matrix[row+1][col-offset] + number;
+                        offset++;
+                    }
+                    
+                    offset = 1;
+                    while(col+offset < matrix[row].length && /[0-9]/g.test(matrix[row+1][col+offset])) {
+                        number = number + matrix[row+1][col+offset];
+                        offset++;
+                    }
+
+                    adjacents.push(parseInt(number));
+                }
+                else {
+                    if(row+1 < matrix.length && col > 0 && /[0-9]/g.test(matrix[row+1][col-1])) {
+                        //determine mulitdigit number
+                        console.log("adjacent bottom-left");
+                        var number = "";
+                        var offset = 1;
+                        while(col-offset >= 0 && /[0-9]/g.test(matrix[row+1][col-offset])) {
+                            number = matrix[row+1][col-offset] + number;
+                            offset++;
+                        }
+                        adjacents.push(parseInt(number));
+                    }
+                    
+                    if(row+1 < matrix.length && col+1 < matrix[row].length && /[0-9]/g.test(matrix[row+1][col+1])) {
+                        //determine mulitdigit number
+                        console.log("adjacent bottom-right");
+                        var number = "";
+                        var offset = 1;
+                        while(col+offset < matrix[row].length && /[0-9]/g.test(matrix[row+1][col+offset])) {
+                            number = number + matrix[row+1][col+offset];
+                            offset++;
+                        }
+                        adjacents.push(parseInt(number));
+                    }
+                }
+
+
+
+
+                return adjacents;
+            }
+      </script>
+    </body>
+</html>
