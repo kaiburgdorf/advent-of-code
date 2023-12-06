@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <textarea id="puzzleInput" rows="10" cols="100"></textarea>
+            <button onclick="solveClick()">solve</button>
+        </div>
+        <div>
+            <p id="solutionOutput"></p>
+        </div>
+
+        <script>
+
+            var scratchcardsWon = [];
+
+            function solveClick() {
+                var text = document.getElementById('puzzleInput').value;
+                var rows = text.split("\n");
+                var sum = 0;
+
+                rows.forEach((element, elemIndex) => {
+                    var card = element.split(":")[1].trim();
+
+                    var [winningNumbers, myNumbers] = card.split("|");
+                    winningNumbers = winningNumbers.trim().split(/\s+/g);
+                    winningNumbers.forEach((number, index) => {
+                        winningNumbers[index] = parseInt(number.trim());
+                    });
+                    myNumbers = myNumbers.trim().split(/\s+/g);
+
+
+                    var rightNumbers = 0;
+                    myNumbers.forEach((number, index) => {
+                        myNumbers[index] = parseInt(number.trim());
+                        var current = parseInt(number.trim());
+                        if(winningNumbers.includes(current)) rightNumbers++;
+                    });
+
+                    if(rightNumbers > 0) scratchcardsWon.push(elemIndex+1);
+                    while (rightNumbers > 0) {
+                        scratchcardsWon.push(elemIndex+1+rightNumbers);
+                        rightNumbers--;
+                    }
+
+                    console.log("card " + (elemIndex+1));
+                    var numberOfCopies = 0;
+                    scratchcardsWon.forEach((scratchardCopy, index) => {
+                        if(scratchardCopy == (elemIndex+1)) numberOfCopies++;
+                    });
+                    console.log(numberOfCopies);
+                    console.log(scratchcardsWon);
+
+
+                });
+
+                console.log("scratchcardsWon");
+                console.log(scratchcardsWon.sort());
+
+                var outputElement = document.getElementById('solutionOutput');
+                outputElement.innerHTML = sum;
+            }
+        </script>
+    </body>
+</html>

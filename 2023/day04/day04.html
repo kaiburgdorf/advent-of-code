@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+    <body>
+        <div>
+            <textarea id="puzzleInput" rows="10" cols="100"></textarea>
+            <button onclick="solveClick()">solve</button>
+        </div>
+        <div>
+            <p id="solutionOutput"></p>
+        </div>
+
+        <script>
+            function solveClick() {
+                var text = document.getElementById('puzzleInput').value;
+                var rows = text.split("\n");
+                var sum = 0;
+
+                rows.forEach(element => {
+                    var card = element.split(":")[1].trim();
+
+                    var [winningNumbers, myNumbers] = card.split("|");
+                    winningNumbers = winningNumbers.trim().split(/\s+/g);
+                    winningNumbers.forEach((number, index) => {
+                        winningNumbers[index] = parseInt(number.trim());
+                    });
+                    myNumbers = myNumbers.trim().split(/\s+/g);
+
+
+                    var rightNumbers = 0;
+                    myNumbers.forEach((number, index) => {
+                        myNumbers[index] = parseInt(number.trim());
+                        var current = parseInt(number.trim());
+                        if(winningNumbers.includes(current)) rightNumbers++;
+                    });
+
+                    console.log(winningNumbers);
+                    console.log(myNumbers);
+                    console.log(rightNumbers);
+
+                    var points = 0;
+                    while(rightNumbers > 0) {
+                        points = (points == 0) ? 1 : points*2;
+                        rightNumbers--;
+                    }
+                    console.log(points);
+                    sum += points;
+                });
+
+                var outputElement = document.getElementById('solutionOutput');
+                outputElement.innerHTML = sum;
+            }
+        </script>
+    </body>
+</html>
