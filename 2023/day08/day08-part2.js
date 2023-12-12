@@ -9,17 +9,14 @@ const rows = data.split("\n");
 
 var network = {};
 var instructions = rows[0].trim().split("");
-console.log(instructions);
+cycles = [];
 
+//building up the network object
 const networkRows = rows.splice(2);
-
 networkRows.forEach((element, index) => {
     const key = element.substring(0,3);
     const left = element.substring(7, 10);
     const right = element.substring(12, 15);
-
-    console.log("key " + key + " left: " + left + " right " + right);
-
     network = {
         ...network,
         [key]: {
@@ -30,17 +27,57 @@ networkRows.forEach((element, index) => {
     }
 });
 
+//find all start points
 var currentNodes = [];
 Object.keys(network).forEach((element, index) => {
     if(element.substring(2, 3) === 'A') currentNodes.push(element);
 });
 
-console.log(currentNodes);
-cycles = [];
-
+//find all cycles for each start point
 currentNodes.forEach((element, index) => {
   cycles.push(getCycles(element));
 });
+
+//select a reference node to brute force the foctor that fits
+var refNode = cycles[0][0];
+cycles.forEach((element, index) => {
+  const node = element[0];
+  if(node.roundtripSteps > refNode.roundtripSteps) {
+    refNode = node;
+  }
+});
+
+//brute force the factor it needs for the reference node
+//or in otherwords how many roundtrip the reference node makes until all routes are at ..Z
+var isSolved = false;
+var i = 0;
+while(!isSolved) {
+  if(i%1000000 == 0) console.log(i);
+  var stepsToCheck = refNode.startAtStep + i * refNode.roundtripSteps;
+  possibleForI = true;
+  cycles.forEach((element, i) => {
+    var possibleForNode = false;
+    element.forEach((node, index) => {
+      const isRoundTrip = (stepsToCheck - node.startAtStep) % node.roundtripSteps == 0;
+      if(isRoundTrip) {
+        possibleForNode = true;
+      }
+    });
+    possibleForI = possibleForI && possibleForNode;
+  });
+
+  if(possibleForI) {
+    console.log(cycles);console.log(refNode);console.log(i);
+    console.log("steps: " + (refNode.startAtStep + i * refNode.roundtripSteps));
+    isSolved = true;
+    return;
+  }
+  i++;
+}
+
+
+//--- functions ---
+
 
 function getCycles(startItem) {
   var cycleStarts = [];
@@ -100,46 +137,4 @@ function getCylcle(startItem, instructionsIndex) {
     });
   }
   return steps;
-}
-
-var refNode = cycles[0][0];
-cycles.forEach((element, index) => {
-  const node = element[0];
-  if(node.roundtripSteps > refNode.roundtripSteps) {
-    refNode = node;
-  }
-});
-
-var isSolved = false;
-var i = 0;
-while(!isSolved) {
-  if(i%1000000 == 0) console.log(i);
-  var stepsToCheck = refNode.startAtStep + i * refNode.roundtripSteps;
-  possibleForI = true;
-  cycles.forEach((element, i) => {
-
-   var possibleForNode = false;
-   element.forEach((node, index) => {
-      const isRoundTrip = (stepsToCheck - node.startAtStep) % node.roundtripSteps == 0;
-      if(isRoundTrip) {
-        possibleForNode = true;
-      }
-   });
-    if(possibleForNode) {
-      possibleForI = possibleForI && true;
-    }
-    else {
-      possibleForI = possibleForI && false;
-    }
-  });
-
-  if(possibleForI) {
-    console.log(cycles);
-    console.log(refNode);
-    console.log(i);
-    console.log("steps: " + (refNode.startAtStep + i * refNode.roundtripSteps));
-    isSolved = true;
-    return;
-  }
-  i++;
 }
