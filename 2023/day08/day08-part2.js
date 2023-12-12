@@ -1,13 +1,11 @@
 const fs = require('node:fs');
 
-//const inputFile = './puzzle.txt';
+const inputFile = './puzzle.txt';
 //const inputFile = './puzzle-example.txt';
-const inputFile = './puzzle-example2.txt';
+//const inputFile = './puzzle-example2.txt';
 
 const data = fs.readFileSync(inputFile, 'utf8');
 const rows = data.split("\n");
-
-console.log(rows);
 
 var network = {};
 var instructions = rows[0].trim().split("");
@@ -38,46 +36,110 @@ Object.keys(network).forEach((element, index) => {
 });
 
 console.log(currentNodes);
+cycles = [];
 
-var steps = 0;
-var solved = false;
-while(!solved) {
+currentNodes.forEach((element, index) => {
+  cycles.push(getCycles(element));
+});
+
+function getCycles(startItem) {
+  var cycleStarts = [];
+  var cycles = [];
+
+  var steps = 0;
+  var currentNode = startItem;
+  while(!cycleStarts.includes(currentNode)) {
     instructions.forEach((instruction, index) => {
 
+      //console.log("node: " + currentNode + " instruction: " + instruction);
       if(instruction === 'L') {
-          currentNodes.forEach((element, index) => {
-            currentNodes[index] = network[element].left;
-          });
-          console.log("go left");
+          currentNode = network[currentNode].left;
       }
       else if(instruction === 'R') {
-          currentNodes.forEach((element, index) => {
-            currentNodes[index] = network[element].right;
-          });
-          console.log("go right");
+          currentNode = network[currentNode].right;
       }
       else {
           console.warn("no R or L instruction");
       }
-      
-      steps++;
 
-      //check all for ending with Z
-      solved = true;
-      currentNodes.forEach((element, index) => {
-        if(element.substring(2, 3) === 'Z') {
-          solved = solved && true;
+      steps++;
+      if(currentNode.substring(2, 3) === 'Z') {
+        cycleStarts.push(currentNode);
+        cycles.push({
+          startAtStep: steps,
+          roundtripSteps: getCylcle(currentNode)
+        })
+      }
+    });
+  }
+
+  return cycles;
+}
+
+function getCylcle(startItem, instructionsIndex) {
+  var steps = 0;
+  var currentNode = startItem;
+  var skip = instructionsIndex;
+  while(currentNode != startItem || steps < 1) {
+    instructions.forEach((instruction, index) => {
+      if(skip > 0) {
+        skip--;
+      } 
+      else {
+        if(instruction === 'L') {
+            currentNode = network[currentNode].left;
+        }
+        else if(instruction === 'R') {
+            currentNode = network[currentNode].right;
         }
         else {
-          solved = solved && false;
+            console.warn("no R or L instruction");
         }
-      });
-
-      if(solved) {
-        console.log("solved in steps: " + steps)
-        fs.writeFileSync("./result", "solved in steps: " + steps + "\n");
-        return;
-      } 
-
+        steps++;
+      }
     });
+  }
+  return steps;
+}
+
+var refNode = cycles[0][0];
+cycles.forEach((element, index) => {
+  const node = element[0];
+  if(node.roundtripSteps > refNode.roundtripSteps) {
+    refNode = node;
+  }
+});
+
+var isSolved = false;
+var i = 0;
+while(!isSolved) {
+  if(i%1000000 == 0) console.log(i);
+  var stepsToCheck = refNode.startAtStep + i * refNode.roundtripSteps;
+  possibleForI = true;
+  cycles.forEach((element, i) => {
+
+   var possibleForNode = false;
+   element.forEach((node, index) => {
+      const isRoundTrip = (stepsToCheck - node.startAtStep) % node.roundtripSteps == 0;
+      if(isRoundTrip) {
+        possibleForNode = true;
+      }
+   });
+    if(possibleForNode) {
+      possibleForI = possibleForI && true;
+    }
+    else {
+      possibleForI = possibleForI && false;
+    }
+  });
+
+  if(possibleForI) {
+    console.log(cycles);
+    console.log(refNode);
+    console.log(i);
+    console.log("steps: " + (refNode.startAtStep + i * refNode.roundtripSteps));
+    isSolved = true;
+    return;
+  }
+  i++;
 }
